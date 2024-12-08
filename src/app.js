@@ -1,9 +1,29 @@
 const express = require("express");
 const connectDb=require("./config/database");
+const User=require("./models/User")
 const app = express();
 
-connectDb().then((result)=>{
-  console.log("connection was succesfull",result)// TODO : check here sometimes they directly print the console.log ????
+app.use("/",express.json())
+
+app.post("/signup",async(req,res)=>{
+
+  const user=new User(req.body)
+
+  try{
+    await user.save()
+    res.status(200).send(`user signed up successfully`)  
+  }
+  catch(err)
+  {
+    console.log("error happened in db",err);
+    res.status(400).send("user didnt signed up ")  
+  }
+
+  
+})
+
+connectDb().then(()=>{
+  console.log("connection was succesfull")
 
   app.listen(7777, "localhost", () => {
     console.log("Hello from new world terminal");
