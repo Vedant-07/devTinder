@@ -47,19 +47,6 @@ app.delete("/user", async (req, res) => {
   const userId = req.body.userId;
   try {
     const what_query = await User.findByIdAndDelete(userId);
-
-    console.log(what_query);
-    // what query retuens the document which was deleted
-    // {
-    //   _id: new ObjectId('67556f6e42d1b3bc54b6e6b4'),
-    //   firstName: 'Vedant',
-    //   lastName: 'Patel',
-    //   emailID: 'vpatel@email.com',
-    //   password: '12347',
-    //   age: 23,
-    //   gender: 'M',
-    //   __v: 0
-    // }
     res.send("user is deleted");
   } catch (err) {
     console.log(`error in deleting`, err);
