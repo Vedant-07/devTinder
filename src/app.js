@@ -54,21 +54,38 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-app.patch("/user", async (req, res) => {
-  const userEmailId = req.body.userEmailId;
-  console.log(userEmailId);
+app.patch("/user/:userID", async (req, res) => {
+  const id=req.params.userID
+  console.log(id);
+  const user = req.body;
+  console.log(user);
+  
+//this are the values which are allowed to change
+const ALLOWED_VALUES=[
+  "password", "gender", "skills" , "bio" 
+]
+
   try {
-    const query = { emailID: userEmailId };
+    //assuming the user exists here.....
+    const result=Object.keys(user).every((val)=>{
+      return ALLOWED_VALUES.includes(val)
+    })
+    console.log("result of allowed valuessssssssssssssssssssssssssssssss ",result);
+    if(!result) throw new Error("some listed values cant be updated")
+
+    const query = {_id: id };
     const userBefore = await User.findOneAndUpdate(
       query,
-      { firstName: "crazy" },
-      { returnDocument: "before" }
+      user,
+      { 
+        returnDocument: "before",
+        runValidators:true 
+      }
     );
 
     res.status(200).send(`user is updated ${JSON.stringify(userBefore)}`);
   } catch (err) {
-    res.status(404).send("user ain't updated");
-    console.log("problem in patching the user", err);
+    res.status(404).send("user ain't updated "+err);
   }
 });
 
