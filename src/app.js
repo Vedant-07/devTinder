@@ -5,7 +5,7 @@ const app = express();
 const { checkValidation } = require("./utils/validation");
 const bcrypt = require("bcryptjs");
 const cookie_parser = require("cookie-parser");
-
+const jwt = require("jsonwebtoken");
 app.use("/", express.json());
 //for cookies use a middlewre
 app.use(cookie_parser());
@@ -45,7 +45,8 @@ app.post("/signin", async (req, res) => {
     if (!check) throw new Error("invalid password ");
     //create a JWT token
     //res.cookie("token",checkUser._id)
-    res.cookie("token", "this is the token which is sent");
+    const crypticMsg = jwt.sign({data:checkUser._id}, "7");
+    res.cookie("token", crypticMsg);
     res.send("user is verified");
   } catch (e) {
     res.status(404).send("error : " + e);
@@ -53,11 +54,14 @@ app.post("/signin", async (req, res) => {
 });
 
 // get or post here???
-app.get("/profile", (req, res) => {
+app.get("/profile", async (req, res) => {
   try {
     //take out the cookies here
     const { token } = req.cookies;
-    res.send("tis is user token " + token);
+    //assuming evertghing goes well
+    const deCrypt = jwt.verify(token, "7");
+    const user = await User.findById(deCrypt.data);
+    res.send("tis is user token " + user);
   } catch (err) {
     res.send("problem in token  ", err);
   }
