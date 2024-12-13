@@ -2,6 +2,8 @@ const express = require("express");
 const connectDb = require("./config/database");
 const User = require("./models/User");
 const app = express();
+const { checkValidation } = require("./utils/validation");
+const bcrypt = require("bcryptjs");
 
 app.use("/", express.json());
 
@@ -30,15 +32,34 @@ app.get("/feed", async (req, res) => {
   }
 });
 
-app.post("/signup", async (req, res) => {
-  const user = new User(req.body);
-
+app.post("/signin", async (req, res) => {
   try {
+    const checkUser = await User.findOne({ emailID: req.body.emailID });
+    if (!checkUser) throw new Error(" email doesnt exists");
+    console.log(req.body.password);
+    console.log(checkUser);
+    const check = await bcrypt.compare(req.body.password, checkUser.password);
+    console.log("check ==> ", check);
+    if (!check) throw new Error("invalid password ");
+    res.send("user is verified");
+  } catch (e) {
+    res.status(404).send("error : " + e);
+  }
+});
+
+app.post("/signup", async (req, res) => {
+  try {
+    checkValidation(req.body);
+    const saltRounds = 7;
+    const newPwd = await bcrypt.hash(req.body.password, saltRounds);
+    console.log(newPwd);
+    req.body.password = newPwd;
+    const user = new User(req.body);
     await user.save();
     res.status(200).send(`user signed up successfully`);
   } catch (err) {
     console.log("error happened in db", err);
-    res.status(400).send("user didnt signed up ");
+    res.status(400).send("user didnt signed up " + err);
   }
 });
 
@@ -55,37 +76,34 @@ app.delete("/user", async (req, res) => {
 });
 
 app.patch("/user/:userID", async (req, res) => {
-  const id=req.params.userID
+  const id = req.params.userID;
   console.log(id);
   const user = req.body;
   console.log(user);
-  
-//this are the values which are allowed to change
-const ALLOWED_VALUES=[
-  "password", "gender", "skills" , "bio" 
-]
+
+  //this are the values which are allowed to change
+  const ALLOWED_VALUES = ["password", "gender", "skills", "bio"];
 
   try {
     //assuming the user exists here.....
-    const result=Object.keys(user).every((val)=>{
-      return ALLOWED_VALUES.includes(val)
-    })
-    console.log("result of allowed valuessssssssssssssssssssssssssssssss ",result);
-    if(!result) throw new Error("some listed values cant be updated")
-
-    const query = {_id: id };
-    const userBefore = await User.findOneAndUpdate(
-      query,
-      user,
-      { 
-        returnDocument: "before",
-        runValidators:true 
-      }
+    const result = Object.keys(user).every((val) => {
+      return ALLOWED_VALUES.includes(val);
+    });
+    console.log(
+      "result of allowed valuessssssssssssssssssssssssssssssss ",
+      result
     );
+    if (!result) throw new Error("some listed values cant be updated");
+
+    const query = { _id: id };
+    const userBefore = await User.findOneAndUpdate(query, user, {
+      returnDocument: "before",
+      runValidators: true,
+    });
 
     res.status(200).send(`user is updated ${JSON.stringify(userBefore)}`);
   } catch (err) {
-    res.status(404).send("user ain't updated "+err);
+    res.status(404).send("user ain't updated " + err);
   }
 });
 
