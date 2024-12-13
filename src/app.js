@@ -4,9 +4,11 @@ const User = require("./models/User");
 const app = express();
 const { checkValidation } = require("./utils/validation");
 const bcrypt = require("bcryptjs");
+const cookie_parser = require("cookie-parser");
 
 app.use("/", express.json());
-
+//for cookies use a middlewre
+app.use(cookie_parser());
 app.get("/user", async (req, res) => {
   const findUser = req.body.firstName;
   try {
@@ -36,14 +38,28 @@ app.post("/signin", async (req, res) => {
   try {
     const checkUser = await User.findOne({ emailID: req.body.emailID });
     if (!checkUser) throw new Error(" email doesnt exists");
-    console.log(req.body.password);
-    console.log(checkUser);
+    // console.log(req.body.password);
+    // console.log(checkUser);
     const check = await bcrypt.compare(req.body.password, checkUser.password);
-    console.log("check ==> ", check);
+    // console.log("check ==> ", check);
     if (!check) throw new Error("invalid password ");
+    //create a JWT token
+    //res.cookie("token",checkUser._id)
+    res.cookie("token", "this is the token which is sent");
     res.send("user is verified");
   } catch (e) {
     res.status(404).send("error : " + e);
+  }
+});
+
+// get or post here???
+app.get("/profile", (req, res) => {
+  try {
+    //take out the cookies here
+    const { token } = req.cookies;
+    res.send("tis is user token " + token);
+  } catch (err) {
+    res.send("problem in token  ", err);
   }
 });
 
