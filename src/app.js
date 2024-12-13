@@ -9,6 +9,8 @@ const jwt = require("jsonwebtoken");
 app.use("/", express.json());
 //for cookies use a middlewre
 app.use(cookie_parser());
+const userAuth = require("./middlewares/auth");
+
 app.get("/user", async (req, res) => {
   const findUser = req.body.firstName;
   try {
@@ -45,7 +47,7 @@ app.post("/signin", async (req, res) => {
     if (!check) throw new Error("invalid password ");
     //create a JWT token
     //res.cookie("token",checkUser._id)
-    const crypticMsg = jwt.sign({data:checkUser._id}, "7");
+    const crypticMsg = jwt.sign({ _id: checkUser._id }, "7", { expiresIn: 10 });
     res.cookie("token", crypticMsg);
     res.send("user is verified");
   } catch (e) {
@@ -54,13 +56,14 @@ app.post("/signin", async (req, res) => {
 });
 
 // get or post here???
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    //take out the cookies here
-    const { token } = req.cookies;
-    //assuming evertghing goes well
-    const deCrypt = jwt.verify(token, "7");
-    const user = await User.findById(deCrypt.data);
+    // //take out the cookies here
+    // const { token } = req.cookies;
+    // //assuming evertghing goes well
+    // const deCrypt = jwt.verify(token, "7");
+    // const user = await User.findById(deCrypt.data);
+    const user = req.user;
     res.send("tis is user token " + user);
   } catch (err) {
     res.send("problem in token  ", err);
