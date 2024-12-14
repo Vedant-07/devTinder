@@ -38,17 +38,18 @@ app.get("/feed", async (req, res) => {
 
 app.post("/signin", async (req, res) => {
   try {
-    const checkUser = await User.findOne({ emailID: req.body.emailID });
-    if (!checkUser) throw new Error(" email doesnt exists");
+    const user = await User.findOne({ emailID: req.body.emailID });
+    if (!user) throw new Error(" email doesnt exists");
     // console.log(req.body.password);
     // console.log(checkUser);
-    const check = await bcrypt.compare(req.body.password, checkUser.password);
+    const checkUser =await user.isPasswordValidated(req.body.password);
     // console.log("check ==> ", check);
-    if (!check) throw new Error("invalid password ");
+    if (!checkUser) throw new Error("invalid password ");
     //create a JWT token
     //res.cookie("token",checkUser._id)
-    const crypticMsg = jwt.sign({ _id: checkUser._id }, "7", { expiresIn: 10 });
-    res.cookie("token", crypticMsg);
+
+    //const crypticMsg = jwt.sign({ _id: checkUser._id }, "7", { expiresIn: 10 });
+    res.cookie("token", user.getJWT());
     res.send("user is verified");
   } catch (e) {
     res.status(404).send("error : " + e);
