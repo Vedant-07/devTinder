@@ -25,10 +25,22 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    //TODO: whats the difference in the style of validators here
+    validate: {
+      //what if i change the name of the function || fast fwrd , this worked to be fine
+      validator(password) {
+        // also changing the name of the parameter here | check the docs duhhhhh.....
+        return validator.isStrongPassword(password);
+      },
+      message: (msgVal) => {
+        //what if i tried to write the message here using throw
+        throw new Error("password isnt strong enough " + msgVal.message);
+      },
+    },
   },
   age: {
     type: Number,
-    min: [18, "Must be atleast 18 ,got ${VALUE}"],
+    min: [18, "Must be atleast 18 ,got {VALUE}"],
   },
   gender: {
     type: String,
@@ -58,7 +70,7 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.getJWT = function () {
   const user = this;
 
-  const token = jwt.sign({ _id: user._id }, "7", { expiresIn: 10 });
+  const token = jwt.sign({ _id: user._id }, "7", { expiresIn: 10 * 10 });
   return token;
 };
 
@@ -66,7 +78,7 @@ userSchema.methods.isPasswordValidated = async function (userPassword) {
   const user = this;
 
   const isValid = await bcrypt.compare(userPassword, user.password);
-  console.log("isValid : "+isValid);
+  console.log("isValid : " + isValid);
   return isValid;
 };
 

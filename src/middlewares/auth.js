@@ -16,7 +16,7 @@ const userAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    res.status(404).send("Error Here exclusively : " + err.message);
+    res.status(404).send("Error Here exclusively from UserAuth  : " + err.message);
   }
 };
 

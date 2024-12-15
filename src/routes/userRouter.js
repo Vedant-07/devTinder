@@ -15,5 +15,37 @@ userRouter.get("/feed", async (req, res) => {
     }
   });
 
+//edit this later to some sensible info...
+userRouter.patch("/user/:userID", async (req, res) => {
+    const id = req.params.userID;
+    console.log(id);
+    const user = req.body;
+    console.log(user);
+  
+    //this are the values which are allowed to change
+    const ALLOWED_VALUES = ["password", "gender", "skills", "bio"];
+  
+    try {
+      //assuming the user exists here.....
+      const result = Object.keys(user).every((val) => {
+        return ALLOWED_VALUES.includes(val);
+      });
+      console.log(
+        "result of allowed valuessssssssssssssssssssssssssssssss ",
+        result
+      );
+      if (!result) throw new Error("some listed values cant be updated");
+  
+      const query = { _id: id };
+      const userBefore = await User.findOneAndUpdate(query, user, {
+        returnDocument: "before",
+        runValidators: true,
+      });
+  
+      res.status(200).send(`user is updated ${JSON.stringify(userBefore)}`);
+    } catch (err) {
+      res.status(404).send("user ain't updated " + err);
+    }
+  });
 
 module.exports=userRouter

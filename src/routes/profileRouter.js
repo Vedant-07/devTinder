@@ -2,42 +2,41 @@ const express = require("express");
 const User = require("../models/User");
 const profileRouter = express.Router();
 const userAuth = require("../middlewares/auth");
+const { checkProfileEdit ,validateProfilePassword} = require("../utils/validation");
+const bcrypt = require("bcryptjs");
 
-profileRouter.patch("/user/:userID", async (req, res) => {
-    const id = req.params.userID;
-    console.log(id);
-    const user = req.body;
-    console.log(user);
-  
-    //this are the values which are allowed to change
-    const ALLOWED_VALUES = ["password", "gender", "skills", "bio"];
-  
-    try {
-      //assuming the user exists here.....
-      const result = Object.keys(user).every((val) => {
-        return ALLOWED_VALUES.includes(val);
-      });
-      console.log(
-        "result of allowed valuessssssssssssssssssssssssssssssss ",
-        result
+profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+  try {
+    //assuming the user exists here.....
+    const user = req.user;
+    console.log("user from the prifile/edit ", user);
+    const editValues = req.body;
+    console.log("user from the prifile/edit ", editValues);
+
+    if (!checkProfileEdit(editValues))
+      throw new Error("valid fields arent passed in the profile/edit");
+
+    const query = { _id: user.id };
+    //CHECK HERE whether the skills are updated or not??????
+    const userBefore = await User.findByIdAndUpdate(user.id, editValues, {
+      returnDocument: "before",
+      runValidators: true,
+    });
+
+    res
+      .status(200)
+      .send(
+        `user is updated from having this values ===> ${JSON.stringify(
+          userBefore
+        )}`
       );
-      if (!result) throw new Error("some listed values cant be updated");
-  
-      const query = { _id: id };
-      const userBefore = await User.findOneAndUpdate(query, user, {
-        returnDocument: "before",
-        runValidators: true,
-      });
-  
-      res.status(200).send(`user is updated ${JSON.stringify(userBefore)}`);
-    } catch (err) {
-      res.status(404).send("user ain't updated " + err);
-    }
-  });
+  } catch (err) {
+    res.status(404).send("user ain't updated ==> " + err.message);
+  }
+});
 
-  
 // get or post here???
-profileRouter.get("/profile", userAuth, async (req, res) => {
+profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     // //take out the cookies here
     // const { token } = req.cookies;
@@ -51,17 +50,34 @@ profileRouter.get("/profile", userAuth, async (req, res) => {
   }
 });
 
+profileRouter.patch("/profile/password", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    //add the validation that only password and email is passed
+    let editObj = req.body;
+    if (!validateProfilePassword(editObj))
+      throw new Error("only send password and email plzz ");
+
+    editObj.password=await bcrypt.hash(editObj.password,7)
+    //not adding the util validation fn here,so as to check the schema validations
+    await User.findByIdAndUpdate(user.id, editObj);
+    //await newPasswordUser.save();
+    res.status(200).send("Your password has been updated " + user.firstName);
+  } catch (err) {
+    res.status(400).send("problem in profile/password .....  "+ err);
+  }
+});
+
 //delete the user
 profileRouter.delete("/user", async (req, res) => {
-    const userId = req.body.userId;
-    try {
-      const what_query = await User.findByIdAndDelete(userId);
-      res.send("user is deleted");
-    } catch (err) {
-      console.log(`error in deleting`, err);
-      res.send("problem in delete");
-    }
-  });
+  const userId = req.body.userId;
+  try {
+    const what_query = await User.findByIdAndDelete(userId);
+    res.send("user is deleted");
+  } catch (err) {
+    console.log(`error in deleting`, err);
+    res.send("problem in delete");
+  }
+});
 
-
-module.exports=profileRouter
+module.exports = profileRouter;
