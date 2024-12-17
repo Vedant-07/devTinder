@@ -16,7 +16,7 @@ app.use(cookie_parser());
 app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use( "/",userRouter);
-//app.use("/", requestRouter);
+app.use("/", requestRouter);
 
 connectDb()
   .then(() => {

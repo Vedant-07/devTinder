@@ -34,8 +34,15 @@ const validateProfilePassword = (user) => {
   return isValidFields;
 };
 
+const isStatusValidForSending=(status)=>{
+  const ALLOWED_VALUES=["interested","ignore"]
+  //trying the valid here,would it work?
+  return  ALLOWED_VALUES.includes(status)
+}
+
 module.exports = {
   checkValidation,
   validateProfilePassword,
   checkProfileEdit,
+  isStatusValidForSending
 };

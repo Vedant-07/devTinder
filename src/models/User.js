@@ -64,15 +64,23 @@ const userSchema = new mongoose.Schema({
     //this was the cosing style ,and its not mentioned in the docs???
     required: true,
   },
+},{
+  timestamps:true
 });
 
 //creating the userSchema methods
 userSchema.methods.getJWT = function () {
   const user = this;
 
-  const token = jwt.sign({ _id: user._id }, "7", { expiresIn: 10 * 10 });
+  const token = jwt.sign({ _id: user._id }, "7", { expiresIn: 60 * 60 });
   return token;
 };
+
+//creating the indexes on the user password & email password
+userSchema.index({
+  emailID:1,
+  password:1
+})
 
 userSchema.methods.isPasswordValidated = async function (userPassword) {
   const user = this;
