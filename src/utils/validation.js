@@ -40,9 +40,15 @@ const isStatusValidForSending=(status)=>{
   return  ALLOWED_VALUES.includes(status)
 }
 
+const isStatusValidForReviewing=(status)=>{
+  const ALLOWED_VALUES=["accepted","rejected"]
+  return ALLOWED_VALUES.includes(status)
+}
+
 module.exports = {
   checkValidation,
   validateProfilePassword,
   checkProfileEdit,
-  isStatusValidForSending
+  isStatusValidForSending,
+  isStatusValidForReviewing
 };
