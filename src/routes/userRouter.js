@@ -4,19 +4,7 @@ const userRouter = express.Router();
 const userAuth = require("../middlewares/auth");
 const ConnectionRequest = require("../models/ConnectionRequest");
 
-const validUserData="firstName lastName age bio skills gender"
-//feeed the data
-userRouter.get("/feed", async (req, res) => {
-  //  `const findUser = req.body.firstName;
-  try {
-    const users = await User.find({});
-    if (users.length == 0) return res.send("No such user found");
-
-    res.send(users);
-  } catch (err) {
-    console.log("prob in  finding the /user", err);
-  }
-});
+const validUserData = "firstName lastName age bio skills gender";
 
 //edit this later to some sensible info...
 userRouter.patch("/user/:userID", async (req, res) => {
@@ -80,36 +68,76 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   }
 });
 
-userRouter.get("/user/connections",userAuth,async(req,res)=>{
-  const loggedInUser=req.user
+userRouter.get("/user/connections", userAuth, async (req, res) => {
+  const loggedInUser = req.user;
 
-  const users=await ConnectionRequest.find({
-    status:"accepted",
-    $or:[{fromUserId:loggedInUser._id},{toUserId:loggedInUser._id}]
+  const users = await ConnectionRequest.find({
+    status: "accepted",
+    $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
   }).populate({
-    path:"fromUserId toUserId",
-    select:validUserData
-  })
+    path: "fromUserId toUserId",
+    select: validUserData,
+  });
 
-  const connectedUsers=new Set();
+  const connectedUsers = new Set();
 
-  users.map((val)=>{
+  users.map((val) => {
     //check this one .....
-    connectedUsers.add(val.fromUserId)
-    connectedUsers.add(val.toUserId)
-  })
+    connectedUsers.add(val.fromUserId);
+    connectedUsers.add(val.toUserId);
+  });
 
   //remove loggedInUser from here
-  const validUsers=Array.from(connectedUsers).filter((val)=>{
-    return !val._id.equals(loggedInUser._id)
-  })
-
+  const validUsers = Array.from(connectedUsers).filter((val) => {
+    return !val._id.equals(loggedInUser._id);
+  });
 
   res.json({
-    message:"users coonected to "+loggedInUser.firstName,
-    data:validUsers
-  })
+    message: "users connected to " + loggedInUser.firstName,
+    data: validUsers,
+  });
+});
 
-})
+userRouter.get("/user/feed", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    const page=+req.query.page || 0
+    let limit=+req.query.limit || 3
+    let skipPage=(page-1)*limit
+    limit=limit>20?20:limit
+    const connectedUsers = await ConnectionRequest.find({
+      $or: [{ toUserId: loggedInUser._id }, { fromUserId: loggedInUser._id }],
+    }).populate({
+      path:"fromUserId toUserId",
+      select:validUserData
+    });
+
+    const hideUsers = new Set();
+
+    connectedUsers.map((val) => {
+      hideUsers.add(val.fromUserId);
+      hideUsers.add(val.toUserId);
+    });
+
+    //find the valid users
+
+    
+    const validUser = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUsers) } },
+        { _id: { $ne: loggedInUser._id } },
+      ],
+    }).skip(skipPage).limit(limit);
+
+
+
+    res.json({
+      message: "connectedUsers are",
+      data: validUser,
+    });
+  } catch (err) {
+    res.status(404).send("problem in /user/feed " + err.message);
+  }
+});
 
 module.exports = userRouter;
