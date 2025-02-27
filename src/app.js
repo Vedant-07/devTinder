@@ -1,6 +1,6 @@
 const express = require("express");
 const connectDb = require("./config/database");
-const cors = require("cors");
+
 const app = express();
 const cookie_parser = require("cookie-parser");
 
@@ -9,27 +9,21 @@ const profileRouter = require("./routes/profileRouter");
 const userRouter = require("./routes/userRouter");
 const requestRouter = require("./routes/requestRouter");
 
-const corsOptions = {
-  origin: "http://localhost:5173",
-  credentials: true,
-};
-
-app.use("/", cors(corsOptions));
 app.use("/", express.json());
 //for cookies use a middlewre
 app.use(cookie_parser());
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
-app.use("/", userRouter);
+app.use( "/",userRouter);
 app.use("/", requestRouter);
 
 connectDb()
   .then(() => {
-    console.log("db connection was succesfull");
+    console.log("connection was succesfull");
 
     app.listen(7777, "localhost", () => {
-      console.log("Server listening on port 7777");
+      console.log("Hello from new world terminal");
     });
   })
   .catch((err) => console.log("damm encountered the errir here", err));
