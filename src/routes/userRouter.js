@@ -4,7 +4,7 @@ const userRouter = express.Router();
 const userAuth = require("../middlewares/auth");
 const ConnectionRequest = require("../models/ConnectionRequest");
 
-const validUserData = "firstName lastName age bio skills gender";
+const validUserData = "firstName lastName age bio skills gender profile_pic";
 
 //edit this later to some sensible info...
 userRouter.patch("/user/:userID", async (req, res) => {
@@ -51,12 +51,17 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
       status: "interested",
     }).populate({
       path: "fromUserId",
-      select: "firstName lastName age gender skills bio",
+      select: "firstName lastName age gender skills bio profile_pic",
     });
-
     //use map to extract the fromUser
     const users = receivedUsers.map((val) => {
-      return val.fromUserId;
+      return {
+        ...val.fromUserId._doc,
+        requestId:val._id
+        //got the idea of spread operator
+        // fromUser:val.fromUserId,
+        // requestId:val._id
+      };
     });
 
     res.json({
@@ -104,6 +109,7 @@ userRouter.get("/user/feed", userAuth, async (req, res) => {
     const page=+req.query.page || 0
     let limit=+req.query.limit || 3
     let skipPage=(page-1)*limit
+    skipPage=skipPage<0?0:skipPage
     limit=limit>20?20:limit
     const connectedUsers = await ConnectionRequest.find({
       $or: [{ toUserId: loggedInUser._id }, { fromUserId: loggedInUser._id }],

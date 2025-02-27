@@ -12,8 +12,9 @@ authRouter.post("/signup", async (req, res) => {
     console.log(newPwd);
     req.body.password = newPwd;
     const user = new User(req.body);
-    await user.save();
-    res.status(200).send(`user signed up successfully`);
+    const signedUpUser=await user.save();
+    res.cookie("token", signedUpUser.getJWT());
+    res.status(200).send(signedUpUser);
   } catch (err) {
     console.log("error happened in db", err);
     res.status(400).send("user didnt signed up " + err);
@@ -34,7 +35,7 @@ authRouter.post("/signin", async (req, res) => {
 
     //const crypticMsg = jwt.sign({ _id: checkUser._id }, "7", { expiresIn: 10 });
     res.cookie("token", user.getJWT());
-    res.send("user is verified");
+    res.send(user);
   } catch (e) {
     res.status(404).send("error : " + e);
   }

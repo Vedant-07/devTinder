@@ -13,7 +13,7 @@ const checkValidation = (req) => {
 };
 
 const checkProfileEdit = (data) => {
-  const ALLOWED_VALUES = ["gender", "skills", "bio", "age"];
+  const ALLOWED_VALUES = ["gender", "skills", "bio", "age","firstName","lastName","profile_pic"];
   const isValid = Object.keys(data).every((k) => {
     return ALLOWED_VALUES.includes(k);
   });
