@@ -9,7 +9,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
   try {
     //assuming the user exists here.....
     const user = req.user;
-    console.log("user from the prifile/edit ", user);
+    console.log("user orginal ", user);
     const editValues = req.body;
     console.log("user from the prifile/edit ", editValues);
 
@@ -17,18 +17,16 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
       throw new Error("valid fields arent passed in the profile/edit");
 
     const query = { _id: user.id };
-    //CHECK HERE whether the skills are updated or not??????
-    const userBefore = await User.findByIdAndUpdate(user.id, editValues, {
-      returnDocument: "before",
+    
+    const userAfter = await User.findByIdAndUpdate(user.id, editValues, {
+      returnDocument: "after",
       runValidators: true,
     });
 
     res
       .status(200)
       .send(
-        `user is updated from having this values ===> ${JSON.stringify(
-          userBefore
-        )}`
+        userAfter
       );
   } catch (err) {
     res.status(404).send("user ain't updated ==> " + err.message);
@@ -44,7 +42,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
     // const deCrypt = jwt.verify(token, "7");
     // const user = await User.findById(deCrypt.data);
     const user = req.user;
-    res.send("tis is user token " + user);
+    res.send(user);
   } catch (err) {
     res.send("problem in token  ", err);
   }
