@@ -9,8 +9,17 @@ const profileRouter = require("./routes/profileRouter");
 const userRouter = require("./routes/userRouter");
 const requestRouter = require("./routes/requestRouter");
 
+const allowedOrigins = ['http://localhost:5173', 'http://3.109.212.47'];
+
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: function(origin,callback){
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 };
 
@@ -28,20 +37,8 @@ connectDb()
   .then(() => {
     console.log("db connection was succesfull");
 
-    app.listen(7777, "localhost", () => {
+    app.listen(7777, () => {
       console.log("Server listening on port 7777");
     });
   })
   .catch((err) => console.log("damm encountered the errir here", err));
-
-// app.get("/user", async (req, res) => {
-//   const findUser = req.body.firstName;
-//   try {
-//     const user = await User.find({ firstName: findUser });
-//     if (user.length == 0) return res.send("No such user found");
-//     console.log(user);
-//     res.send("Found the user");
-//   } catch (err) {
-//     console.log("prob in  finding the /user", err);
-//   }
-// });
