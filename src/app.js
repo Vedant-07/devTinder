@@ -9,21 +9,28 @@ const profileRouter = require("./routes/profileRouter");
 const userRouter = require("./routes/userRouter");
 const requestRouter = require("./routes/requestRouter");
 
-const allowedOrigins = ['http://localhost:5173', 'http://3.109.212.47'];
+const allowedOrigins = ["http://localhost:5173", "http://3.109.212.47"];
 
-const corsOptions = {
-  origin: function(origin,callback){
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-};
+// const corsOptions = {
+//   origin: function(origin,callback){
+//     if (!origin) return callback(null, true);
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     } else {
+//       return callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+// };
 
-app.use("/", cors(corsOptions));
+// app.use("/", cors(corsOptions));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use("/", express.json());
 //for cookies use a middlewre
 app.use(cookie_parser());
