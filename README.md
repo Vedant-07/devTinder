@@ -115,7 +115,7 @@ This repository contains the backend of DevTinder, built with Node.js, Express, 
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/Vedant-07/devTinder.git
-   cd devTinder-backend
+   cd devTinder
    ```
 
 2. **Set Up Environment Variables**
@@ -124,7 +124,7 @@ This repository contains the backend of DevTinder, built with Node.js, Express, 
    ```
    DATABASE_URL=mongodb+srv://<username>:<password>@cluster0.mongodb.net/devTinder
    JWT_SECRET=your_jwt_secret
-   PORT=3000
+   PORT=7777
    ```
 
 3. **Start the Backend Server**
