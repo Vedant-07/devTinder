@@ -7,7 +7,7 @@ const ConnectionRequest = require("../models/ConnectionRequest");
 const validUserData = "firstName lastName age bio skills gender profile_pic";
 
 //edit this later to some sensible info...
-userRouter.patch("/user/:userID", async (req, res) => {
+userRouter.patch("/:userID", async (req, res) => {
   const id = req.params.userID;
   console.log(id);
   const user = req.body;
@@ -39,7 +39,7 @@ userRouter.patch("/user/:userID", async (req, res) => {
   }
 });
 
-userRouter.get("/user/requests/received", userAuth, async (req, res) => {
+userRouter.get("/requests/received", userAuth, async (req, res) => {
   try {
     //user getting connections of status-- interested
     //get all the requestConnections where status--interested | loggedInUser is the toUserId
@@ -73,7 +73,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
   }
 });
 
-userRouter.get("/user/connections", userAuth, async (req, res) => {
+userRouter.get("/connections", userAuth, async (req, res) => {
   const loggedInUser = req.user;
 
   const users = await ConnectionRequest.find({
@@ -103,7 +103,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
   });
 });
 
-userRouter.get("/user/feed", userAuth, async (req, res) => {
+userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
     const page=+req.query.page || 0

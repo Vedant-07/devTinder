@@ -7,7 +7,7 @@ const userAuth = async (req, res, next) => {
     if (!token)
       throw new Error("No token at the moment  from the UserAuth ...");
     //validator token
-    const DecryptMsg = await jwt.verify(token, "7");
+    const DecryptMsg = await jwt.verify(token, process.env.JWT_SECRET);
     const { _id } = DecryptMsg;
     //Identify the user
     const user = await User.findById(_id);

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
@@ -7,6 +8,7 @@ const cookie_parser = require("cookie-parser");
 
 const app = express();
 const httpServer = createServer(app);
+const PORT = process.env.PORT || 7777;
 
 const authRouter = require("./routes/authRouter");
 const profileRouter = require("./routes/profileRouter");
@@ -15,10 +17,13 @@ const requestRouter = require("./routes/requestRouter");
 const chatRouter = require("./routes/chatRouter");
 const Chat = require("./models/Chat");
 
-// CORS config
+// CORS - allowed origins
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL
+    ],
     credentials: true,
   })
 );
@@ -27,16 +32,19 @@ app.use("/", express.json());
 app.use(cookie_parser());
 
 // Routes
-app.use("/", authRouter);
-app.use("/", profileRouter);
-app.use("/", userRouter);
-app.use("/", requestRouter);
-app.use("/", chatRouter);
+app.use("/auth", authRouter);
+app.use("/profile", profileRouter);
+app.use("/user", userRouter);
+app.use("/request", requestRouter);
+app.use("/chat", chatRouter);
 
 // Socket.IO setup
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL
+    ],
     credentials: true,
   },
 });
@@ -105,8 +113,8 @@ connectDb()
   .then(() => {
     console.log("db connection was succesfull");
 
-    httpServer.listen(7777, () => {
-      console.log("Server listening on port 7777");
+    httpServer.listen(PORT, () => {
+      console.log("Server listening on port " + PORT);
     });
   })
   .catch((err) => console.log("damm encountered the errir here", err));

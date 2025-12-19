@@ -4,7 +4,7 @@ const Chat = require("../models/Chat");
 const userAuth = require("../middlewares/auth");
 
 // Get chat history between two users
-chatRouter.get("/chat/:userId", userAuth, async (req, res) => {
+chatRouter.get("/:userId", userAuth, async (req, res) => {
   try {
     const currentUserId = req.user._id;
     const otherUserId = req.params.userId;

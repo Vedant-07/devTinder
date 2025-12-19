@@ -5,7 +5,7 @@ const userAuth = require("../middlewares/auth");
 const { checkProfileEdit ,validateProfilePassword} = require("../utils/validation");
 const bcrypt = require("bcryptjs");
 
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
+profileRouter.patch("/edit", userAuth, async (req, res) => {
   try {
     //assuming the user exists here.....
     const user = req.user;
@@ -34,7 +34,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
 });
 
 // get or post here???
-profileRouter.get("/profile/view", userAuth, async (req, res) => {
+profileRouter.get("/view", userAuth, async (req, res) => {
   try {
     // //take out the cookies here
     // const { token } = req.cookies;
@@ -48,7 +48,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   }
 });
 
-profileRouter.patch("/profile/password", userAuth, async (req, res) => {
+profileRouter.patch("/password", userAuth, async (req, res) => {
   try {
     const user = req.user;
     //add the validation that only password and email is passed
