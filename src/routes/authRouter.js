@@ -12,8 +12,13 @@ authRouter.post("/signup", async (req, res) => {
     console.log(newPwd);
     req.body.password = newPwd;
     const user = new User(req.body);
-    const signedUpUser=await user.save();
-    res.cookie("token", signedUpUser.getJWT());
+    const signedUpUser = await user.save();
+    res.cookie("token", signedUpUser.getJWT(), {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 3600000
+    });
     res.status(200).send(signedUpUser);
   } catch (err) {
     console.log("error happened in db", err);
@@ -24,17 +29,15 @@ authRouter.post("/signup", async (req, res) => {
 authRouter.post("/signin", async (req, res) => {
   try {
     const user = await User.findOne({ emailID: req.body.emailID });
-    if (!user) throw new Error(" email doesnt exists");
-    // console.log(req.body.password);
-    // console.log(checkUser);
+    if (!user) throw new Error("email doesnt exists");
     const checkUser = await user.isPasswordValidated(req.body.password);
-    // console.log("check ==> ", check);
-    if (!checkUser) throw new Error("invalid password ");
-    //create a JWT token
-    //res.cookie("token",checkUser._id)
-
-    //const crypticMsg = jwt.sign({ _id: checkUser._id }, "7", { expiresIn: 10 });
-    res.cookie("token", user.getJWT());
+    if (!checkUser) throw new Error("invalid password");
+    res.cookie("token", user.getJWT(), {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 3600000
+    });
     res.send(user);
   } catch (e) {
     res.status(404).send("error : " + e);
@@ -43,7 +46,10 @@ authRouter.post("/signin", async (req, res) => {
 
 authRouter.post("/signout", (req, res) => {
   res.cookie("token", null, {
-    expires: 0, // check whether it works ,by default new Date(Date.now()))
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    expires: new Date(0)
   });
   res.send("user is signed out.......");
 });
