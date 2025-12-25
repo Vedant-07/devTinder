@@ -31,4 +31,7 @@ connectionRequestSchema.pre("save", function (next) {
   next();
 });
 
+// Compound index for faster lookups on connection requests
+connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 });
+
 module.exports = mongoose.model("ConnectionRequest", connectionRequestSchema);
